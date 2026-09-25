@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TRUFARM TRADE - Multi-Role Agri Marketplace</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Leaflet CSS & JS for Map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        body { background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .navbar-custom { background-color: #198754; color: white; }
+        .card-custom { border-radius: 12px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .section-title { color: #198754; font-weight: 700; border-bottom: 2px solid #198754; padding-bottom: 5px; }
+        .nav-pills .nav-link.active { background-color: #198754; font-weight: bold; }
+        .nav-pills .nav-link { color: #198754; font-weight: 600; font-size: 1.1rem; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-custom px-4 py-2 shadow-sm mb-4">
+        <a class="navbar-brand text-white fw-bold fs-3" href="#">🌾 TRUFARM TRADE</a>
+        <span class="navbar-text text-white-50">Universal Agri Trading & Logistics Network</span>
+    </nav>
+
+    <div class="container-fluid px-4">
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                <strong>{{ message }}</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+        
+        <div class="card card-custom p-3 mb-4 bg-white">
+            <ul class="nav nav-pills nav-fill" id="roleTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="farmer-tab" data-bs-toggle="tab" data-bs-target="#farmer-portal" type="button" role="tab">👨‍🌾 Farmer Portal</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="buyer-tab" data-bs-toggle="tab" data-bs-target="#buyer-portal" type="button" role="tab">🏢 Buyer / Trader Portal</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="transporter-tab" data-bs-toggle="tab" data-bs-target="#transporter-portal" type="button" role="tab">🚚 Transporter Portal</button>
+                </li>
+            </ul>
+        </div>
+
+        <div class="tab-content" id="roleTabsContent">
+            
+            <!-- 1. FARMER PORTAL -->
+            <div class="tab-pane fade show active" id="farmer-portal" role="tabpanel">
+                <div class="row g-4">
+                    <div class="col-lg-6">
+                        <div class="card card-custom p-4 mb-4 bg-white">
+                            <h5 class="section-title mb-3">👨‍🌾 Farmer Profile Registration</h5>
+                            <form action="/register-farmer" method="POST">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Farmer Name</label>
+                                        <input type="text" name="username" class="form-control" placeholder="Ramesh Kumar" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Phone Number</label>
+                                        <input type="text" name="phone_number" class="form-control" placeholder="9876543210" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">District</label>
+                                        <input type="text" name="district" class="form-control" placeholder="Muzaffarpur">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">State</label>
+                                        <input type="text" name="state" class="form-control" placeholder="Bihar">
+                                    </div>
+                                    <div class="col-12 mt-2">
+                                        <button type="submit" class="btn btn-success w-100 fw-bold py-2">Create Farmer Profile</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="card card-custom p-4 mb-4 bg-white">
+                            <h5 class="section-title mb-3">📋 Registered Farmer Profiles</h5>
+                            <div class="row g-2">
+                                {% for farmer in farmers %}
+                                <div class="col-md-6">
+                                    <div class="border rounded p-3 bg-light">
+                                        <h6 class="fw-bold mb-1">👨‍🌾 {{ farmer.username }}</h6>
+                                        <div class="small text-muted">📱 {{ farmer.phone_number }}</div>
+                                        <div class="small text-muted">📍 {{ farmer.district or 'N/A' }}, {{ farmer.state or 'N/A' }}</div>
+                                        <span class="badge bg-success mt-2">Active Farmer</span>
+                                    </div>
+                                </div>
+                                {% else %}
+                                <div class="text-muted text-center py-2">No farmers registered yet.</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="card card-custom p-4 bg-white">
+                            <h5 class="section-title mb-3">📈 Sell Produce (Farmer Listing)</h5>
+                            <form action="/add-produce" method="POST">
+                                <input type="hidden" name="seller_role" value="Farmer">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Farmer / Seller Name</label>
+                                        <input type="text" name="seller_name" class="form-control" placeholder="Ramesh Kumar" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Crop Name</label>
+                                        <input type="text" name="crop_name" class="form-control" placeholder="Wheat, Paddy, Maize" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Quantity (Quintal)</label>
+                                        <input type="number" name="quantity" class="form-control" placeholder="50" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Expected Price (₹/Qtl)</label>
+                                        <input type="number" name="price" class="form-control" placeholder="2200" required>
+                                    </div>
+                                    <div class="col-12 mt-2">
+                                        <button type="submit" class="btn btn-outline-success w-100 fw-bold py-2">Submit Crop Lot for Sale</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="card card-custom p-4 bg-white">
+                            <h5 class="section-title mb-2">📊 Market Price Prediction (AI)</h5>
+                            <div style="height: 280px;">
+                                <canvas id="priceChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. BUYER PORTAL -->
+            <div class="tab-pane fade" id="buyer-portal" role="tabpanel">
+                <div class="row g-4">
+                    <div class="col-lg-6">
+                        <div class="card card-custom p-4 mb-4 bg-white">
+                            <h5 class="section-title mb-3">🏢 Buyer / Trader Profile</h5>
+                            <form action="/register-buyer" method="POST">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Trader Name</label>
+                                        <input type="text" name="username" class="form-control" placeholder="Amit Sharma" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Firm Name</label>
+                                        <input type="text" name="company_name" class="form-control" placeholder="Agrico Traders" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Phone Number</label>
+                                        <input type="text" name="phone_number" class="form-control" placeholder="9876543210" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">GST Number</label>
+                                        <input type="text" name="gst_number" class="form-control" placeholder="10ABCDE1234F1Z5">
+                                    </div>
+                                    <div class="col-12 mt-2">
+                                        <button type="submit" class="btn btn-primary w-100 fw-bold py-2">Register Buyer Profile</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="card card-custom p-4 mb-4 bg-white">
+                            <h5 class="section-title mb-3">📋 Registered Buyers & Traders</h5>
+                            <div class="row g-2">
+                                {% for buyer in buyers %}
+                                <div class="col-md-6">
+                                    <div class="border rounded p-3 bg-light">
+                                        <h6 class="fw-bold mb-1">🏢 {{ buyer.company_name or buyer.username }}</h6>
+                                        <div class="small text-muted">Owner: {{ buyer.username }}</div>
+                                        <div class="small text-muted">📱 {{ buyer.phone_number }}</div>
+                                        <span class="badge bg-primary mt-2">Trader / Buyer</span>
+                                    </div>
+                                </div>
+                                {% else %}
+                                <div class="text-muted text-center py-2">No buyers registered yet.</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="card card-custom p-4 bg-white">
+                            <h5 class="section-title mb-3">🔄 Re-Sell Stock / Trader Listing</h5>
+                            <form action="/add-produce" method="POST">
+                                <input type="hidden" name="seller_role" value="Trader/Buyer">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Trader / Firm Name</label>
+                                        <input type="text" name="seller_name" class="form-control" placeholder="Agrico Traders" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Crop Name</label>
+                                        <input type="text" name="crop_name" class="form-control" placeholder="Wheat / Pulses" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Available Stock (Quintal)</label>
+                                        <input type="number" name="quantity" class="form-control" placeholder="100" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Selling Price (₹/Qtl)</label>
+                                        <input type="number" name="price" class="form-control" placeholder="2400" required>
+                                    </div>
+                                    <div class="col-12 mt-2">
+                                        <button type="submit" class="btn btn-primary w-100 fw-bold py-2">Post Stock for Wholesale Sale</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="card card-custom p-4 bg-white">
+                            <h5 class="section-title mb-3">🤝 Place Bid on Available Stock</h5>
+                            <form action="/place-bid" method="POST">
+                                <div class="row g-3">
+                                    <div class="col-12">
+                                        <label class="form-label fw-semibold">Bidding Buyer/Firm Name</label>
+                                        <input type="text" name="buyer_name" class="form-control" placeholder="Enter Your Firm Name" required>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label fw-semibold">Select Crop Lot</label>
+                                        <select name="produce_id" class="form-select" required>
+                                            {% for item in produces %}
+                                            <option value="{{ item.id }}">{{ item.crop_name }} (by {{ item.seller_name }} - {{ item.seller_role }}) - {{ item.quantity_kg }} Qtl @ ₹{{ item.expected_price }}</option>
+                                            {% else %}
+                                            <option disabled selected>No produce available</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label fw-semibold">Offered Bid Price (₹/Quintal)</label>
+                                        <input type="number" name="bid_price" class="form-control" placeholder="2350" required>
+                                    </div>
+                                    <div class="col-12 mt-2">
+                                        <button type="submit" class="btn btn-warning text-dark w-100 fw-bold py-2">Submit Bid Offer</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. TRANSPORTER PORTAL -->
+            <div class="tab-pane fade" id="transporter-portal" role="tabpanel">
+                <div class="row g-4">
+                    <div class="col-lg-6">
+                        <div class="card card-custom p-4 bg-white">
+                            <h5 class="section-title mb-3">🚚 Transporter / Logistics Registration</h5>
+                            <form action="/register-transporter" method="POST">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Driver/Owner Name</label>
+                                        <input type="text" name="username" class="form-control" placeholder="Vikram Singh" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Phone Number</label>
+                                        <input type="text" name="phone_number" class="form-control" placeholder="9876543210" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Vehicle Type</label>
+                                        <select name="vehicle_type" class="form-select">
+                                            <option value="Mini Truck (Pickup)">Mini Truck (Pickup)</option>
+                                            <option value="Medium Truck (6-Wheeler)">Medium Truck (6-Wheeler)</option>
+                                            <option value="Heavy Truck (10-Wheeler)">Heavy Truck (10-Wheeler)</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Vehicle Reg. No.</label>
+                                        <input type="text" name="vehicle_number" class="form-control" placeholder="BR-06-GA-1234" required>
+                                    </div>
+                                    <div class="col-12 mt-2">
+                                        <button type="submit" class="btn btn-dark w-100 fw-bold py-2">Register Transporter Profile</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="card card-custom p-4 bg-white">
+                            <h5 class="section-title mb-3">🚛 Registered Transporters Network</h5>
+                            <ul class="list-group list-group-flush">
+                                {% for t in transporters %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                                    <div>
+                                        <strong class="text-dark">{{ t.username }}</strong>
+                                        <div class="small text-muted">{{ t.vehicle_type }} ({{ t.vehicle_number }}) - 📱 {{ t.phone_number }}</div>
+                                    </div>
+                                    <span class="badge bg-dark">Transporter</span>
+                                </li>
+                                {% else %}
+                                <li class="list-group-item text-center text-muted py-3">No transporters registered yet.</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    
+         <div class="row mt-4 mb-5">
+            <div class="col-12">
+                <div class="card card-custom p-4 bg-white">
+                    <h5 class="section-title mb-3">🛒 Universal Live Marketplace Listings (Farmers & Traders)</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Seller Name</th>
+                                    <th>Seller Role</th>
+                                    <th>Crop Name</th>
+                                    <th>Quantity (Qtl)</th>
+                                    <th>Price (₹)</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in produces %}
+                                <tr>
+                                    <td>{{ loop.index }}</td>
+                                    <td class="fw-bold">{{ item.seller_name }}</td>
+                                    <td>
+                                        {% if item.seller_role == 'Farmer' %}
+                                        <span class="badge bg-success">Farmer</span>
+                                        {% else %}
+                                        <span class="badge bg-primary">Trader / Buyer</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="fw-bold text-success">{{ item.crop_name }}</td>
+                                    <td>{{ item.quantity_kg }}</td>
+                                    <td>₹{{ item.expected_price }}</td>
+                                    <td><span class="badge bg-success">Available</span></td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="7" class="text-center text-muted py-3">No produce listings available at the moment.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Nearby Map Section -->
+        <div class="row mt-4 mb-5">
+            <div class="col-12">
+                <div class="card card-custom p-4 bg-white">
+                    <h5 class="section-title mb-3">📍 Nearby Agri Network (Farmers, Buyers & Transporters)</h5>
+                    <p class="text-muted small">Aapke aaspas ke Active Farmers (🟢 Green), Buyers (🔵 Blue), aur Transporters (⚫ Black) ko map par dekhein.</p>
+                    <div id="map" style="height: 420px; width: 100%; border-radius: 10px; border: 1px solid #ddd;"></div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // 1. Map Initialize Karein (Center: Bihar / Muzaffarpur Region)
+            var map = L.map('map').setView([26.1209, 85.3647], 9);
+
+            // 2. OpenStreetMap Layer Load Karein
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+
+            // 3. Markers Data
+            var locations = [
+                { name: "Ramesh Kumar (Farmer)", role: "Farmer", lat: 26.1209, lng: 85.3647, detail: "🌾 Wheat - 50 Quintal" },
+                { name: "Sunil Singh (Farmer)", role: "Farmer", lat: 26.2150, lng: 85.3900, detail: "🌽 Maize - 30 Quintal" },
+                { name: "Agrico Traders (Buyer)", role: "Buyer", lat: 26.1150, lng: 85.4100, detail: "🏢 Buying Paddy & Wheat" },
+                { name: "Vikram Logistics (Transporter)", role: "Transporter", lat: 26.1300, lng: 85.3500, detail: "🚚 10-Wheeler Truck Available" }
+            ];
+
+            // 4. Map Par Markers Plot Karein
+            locations.forEach(function(loc) {
+                var popupText = `<b>${loc.name}</b><br><span class="badge bg-secondary">${loc.role}</span><br>${loc.detail}`;
+                L.marker([loc.lat, loc.lng]).addTo(map)
+                    .bindPopup(popupText);
+            });
+        </script>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const ctx = document.getElementById('priceChart').getContext('2d');
+        let priceChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6 (Predicted)'],
+                datasets: [{
+                    label: 'Wheat Price (₹/Quintal)',
+                    data: [2200, 2230, 2250, 2280, 2310, 2341.0],
+                    borderColor: '#198754',
+                    backgroundColor: 'rgba(25, 135, 84, 0.1)',
+                    fill: true,
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+    </script>
+</body>
+</html>
