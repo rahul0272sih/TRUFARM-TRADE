@@ -121,3 +121,14 @@ def place_bid():
 
 if __name__ == '__main__':
     app.run(debug=True)
+@app.route('/prices')
+def prices():
+    # Sample Mandi Data
+    mandi_data = [
+        {"crop": "Wheat (गेहूं)", "mandi": "Khagaria Mandi", "price": "₹2,250 / Qtl", "trend": "+₹50", "status": "up"},
+        {"crop": "Paddy (धान)", "mandi": "Muzaffarpur Mandi", "price": "₹2,180 / Qtl", "trend": "-₹20", "status": "down"},
+        {"crop": "Maize (मक्का)", "mandi": "Begusarai Mandi", "price": "₹1,950 / Qtl", "trend": "+₹30", "status": "up"},
+        {"crop": "Potato (आलू)", "mandi": "Patna Mandi", "price": "₹1,400 / Qtl", "trend": "0", "status": "neutral"},
+        {"crop": "Tomato (टमाटर)", "mandi": "Samastipur Mandi", "price": "₹2,800 / Qtl", "trend": "+₹100", "status": "up"}
+    ]
+    return render_template('prices.html', rates=mandi_data)
