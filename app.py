@@ -150,3 +150,19 @@ def logistics():
         {"id": 3, "driver": "Bihar Freight Carriers", "type": "10-Wheeler Truck (15 Ton)", "route": "Muzaffarpur ➔ Kolkata / Delhi", "rate": "₹32 / km", "contact": "+91 9765432109", "status": "On Route"}
     ]
     return render_template('logistics.html', vehicles=vehicles_list)
+@app.route('/weather')
+def weather():
+    weather_data = {
+        "location": "Khagaria, Bihar",
+        "temp": "31°C",
+        "condition": "Partly Cloudy",
+        "humidity": "78%",
+        "rain_chance": "20%",
+        "forecast": [
+            {"day": "Tomorrow", "temp": "32°C", "condition": "Sunny", "icon": "bi-sun text-warning"},
+            {"day": "Wednesday", "temp": "29°C", "condition": "Light Rain", "icon": "bi-cloud-drizzle text-primary"},
+            {"day": "Thursday", "temp": "30°C", "condition": "Cloudy", "icon": "bi-cloud text-secondary"}
+        ],
+        "advisory": "Agle 2 dino me हल्की बारिश ki sambhavna hai. Apni katan ki hui fasal (harvested crops) ko khule me na rakhein aur mandi bhejne ke liye tarpaulin cover ka use karein."
+    }
+    return render_template('weather.html', weather=weather_data)
