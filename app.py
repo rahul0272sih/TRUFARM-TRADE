@@ -132,3 +132,13 @@ def prices():
         {"crop": "Tomato (टमाटर)", "mandi": "Samastipur Mandi", "price": "₹2,800 / Qtl", "trend": "+₹100", "status": "up"}
     ]
     return render_template('prices.html', rates=mandi_data)
+@app.route('/marketplace')
+def marketplace():
+    # Sample Marketplace Crops Data
+    crops_list = [
+        {"id": 1, "title": "Premium Organic Wheat", "seller": "Ramesh Kumar", "location": "Khagaria, Bihar", "quantity": "50 Quintals", "price": "₹2,300 / Qtl", "category": "Grains"},
+        {"id": 2, "title": "Fresh Hybrid Maize", "seller": "Suresh Singh", "location": "Begusarai, Bihar", "quantity": "120 Quintals", "price": "₹1,980 / Qtl", "category": "Grains"},
+        {"id": 3, "title": "Sharbati Basmati Rice", "seller": "Amit Patel", "location": "Muzaffarpur, Bihar", "quantity": "30 Quintals", "price": "₹3,800 / Qtl", "category": "Rice"},
+        {"id": 4, "title": "Red Desi Potato", "seller": "Vikas Verma", "location": "Patna, Bihar", "quantity": "80 Quintals", "price": "₹1,450 / Qtl", "category": "Vegetables"}
+    ]
+    return render_template('marketplace.html', crops=crops_list)

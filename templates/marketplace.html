@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crop Marketplace - TRUFARM TRADE</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+</head>
+<body class="bg-light">
+
+    <!-- Header Navigation -->
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/">TRUFARM TRADE</a>
+            <a href="/" class="btn btn-outline-light btn-sm"><i class="bi bi-arrow-left me-1"></i> Back to Home</a>
+        </div>
+    </nav>
+
+    <div class="container my-4">
+        <!-- Page Title & Actions -->
+        <div class="row align-items-center mb-4">
+            <div class="col-md-8">
+                <h2 class="fw-bold"><i class="bi bi-shop text-success me-2"></i>Crop Marketplace</h2>
+                <p class="text-muted mb-0">Direct buy and sell platform for farmers and agri-traders.</p>
+            </div>
+            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#sellCropModal">
+                    <i class="bi bi-plus-circle me-1"></i> List My Crop for Sale
+                </button>
+            </div>
+        </div>
+
+        <!-- Crop Cards Grid -->
+        <div class="row g-4">
+            {% for crop in crops %}
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body">
+                        <span class="badge bg-success-subtle text-success mb-2">{{ crop.category }}</span>
+                        <h5 class="card-title fw-bold">{{ crop.title }}</h5>
+                        <p class="text-muted small mb-2"><i class="bi bi-person me-1"></i>{{ crop.seller }}</p>
+                        <p class="text-muted small mb-2"><i class="bi bi-geo-alt text-danger me-1"></i>{{ crop.location }}</p>
+                        
+                        <div class="border-top pt-2 mt-3 d-flex justify-content-between align-items-center">
+                            <div>
+                                <small class="text-muted d-block">Qty: {{ crop.quantity }}</small>
+                                <span class="fw-bold text-success fs-6">{{ crop.price }}</span>
+                            </div>
+                            <button class="btn btn-outline-success btn-sm">Buy Now</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Sell Crop Simple Modal Popup -->
+    <div class="modal fade" id="sellCropModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header bg-success text-white">
+            <h5 class="modal-title"><i class="bi bi-box-seam me-2"></i>Sell Your Crop Produce</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form>
+              <div class="mb-3">
+                <label class="form-label">Crop Name / Title</label>
+                <input type="text" class="form-control" placeholder="e.g. Fresh Desi Wheat">
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Quantity (Quintals)</label>
+                  <input type="number" class="form-control" placeholder="50">
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Expected Price (₹/Qtl)</label>
+                  <input type="number" class="form-control" placeholder="2200">
+                </div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Location / District</label>
+                <input type="text" class="form-control" placeholder="Khagaria, Bihar">
+              </div>
+              <button type="button" class="btn btn-success w-100" data-bs-dismiss="modal" onclick="alert('Crop listed successfully!')">Post Crop Listing</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
