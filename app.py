@@ -142,3 +142,11 @@ def marketplace():
         {"id": 4, "title": "Red Desi Potato", "seller": "Vikas Verma", "location": "Patna, Bihar", "quantity": "80 Quintals", "price": "₹1,450 / Qtl", "category": "Vegetables"}
     ]
     return render_template('marketplace.html', crops=crops_list)
+@app.route('/logistics')
+def logistics():
+    vehicles_list = [
+        {"id": 1, "driver": "Ramesh Express Logistics", "type": "Tata 407 (3.5 Ton)", "route": "Khagaria ➔ Patna", "rate": "₹18 / km", "contact": "+91 9876543210", "status": "Available"},
+        {"id": 2, "driver": "Kisan Transport Services", "type": "Mahindra Pickup (1.5 Ton)", "route": "Begusarai Local / Inter-district", "rate": "₹14 / km", "contact": "+91 9812345678", "status": "Available"},
+        {"id": 3, "driver": "Bihar Freight Carriers", "type": "10-Wheeler Truck (15 Ton)", "route": "Muzaffarpur ➔ Kolkata / Delhi", "rate": "₹32 / km", "contact": "+91 9765432109", "status": "On Route"}
+    ]
+    return render_template('logistics.html', vehicles=vehicles_list)
